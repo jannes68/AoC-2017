@@ -3,7 +3,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class Day6 {
+public class Day6p2 {
 
 	/*
 
@@ -33,26 +33,42 @@ public class Day6 {
 	
 	Given the initial block counts in your puzzle input, how many redistribution cycles must be completed before a configuration is produced that has been seen before?	
 	
+	--- Part Two ---
+	
+	Out of curiosity, the debugger would also like to know the size of the loop: starting from a state that has already been seen, how many block redistribution cycles must be performed before that same state is seen again?
+	
+	In the example above, 2 4 1 2 is seen again after four cycles, and so the answer in that example would be 4.
+	
+	How many cycles are in the infinite loop that arises from the configuration in your puzzle input?	
+	
 	*/
 	
 	public static void main(String[] args) {
 		
-			int cycles = 0;
-			while(updateBlockPatternUsed()){
-				cycles++;
-				
-				int max = banks.stream().mapToInt(i -> i).max().getAsInt();
-				int startIdx = banks.indexOf(max);
-				int blocksIdx = startIdx + 1;
-				int blocks = banks.get(startIdx);
-				banks.set(startIdx, 0);
-				while(blocks>0) {
-					banks.set(blocksIdx % banks.size(), banks.get(blocksIdx % banks.size()) + 1);
-					blocks--;
-					blocksIdx++;
-				}
-			}
+			int cycles = redistUntilLoop();
+			banksPatternUsed = new HashSet<>();
+			cycles = redistUntilLoop();
+			
 			System.out.println(cycles);
+	}
+
+	private static int redistUntilLoop() {
+		int cycles = 0;
+		while(updateBlockPatternUsed()){
+			cycles++;
+			
+			int max = banks.stream().mapToInt(i -> i).max().getAsInt();
+			int startIdx = banks.indexOf(max);
+			int blocksIdx = startIdx + 1;
+			int blocks = banks.get(startIdx);
+			banks.set(startIdx, 0);
+			while(blocks>0) {
+				banks.set(blocksIdx % banks.size(), banks.get(blocksIdx % banks.size()) + 1);
+				blocks--;
+				blocksIdx++;
+			}
+		}
+		return cycles;
 	}
 
 	static boolean updateBlockPatternUsed() {
