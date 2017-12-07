@@ -42,7 +42,7 @@ public class Day3 {
 	static int xMax = 0;
 	static int yMin = 0;
 	static int yMax = 0;
-
+	static Map<Integer,Map<Integer,Integer>> = new HashMa
 	public static void main(String[] args) {
 
 		IntStream.rangeClosed(2, 368078).forEach(v -> {

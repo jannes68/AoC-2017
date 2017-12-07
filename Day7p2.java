@@ -78,22 +78,17 @@ public class Day7p2 {
 	
 	public static void main(String[] args) {
 		
-		final Map<String,Pgm> allPgmMap = data.stream().map(s -> new Pgm(s)).collect(Collectors.toMap(Pgm::getName, p -> p));
+		final Map<String,Pgm> allPgmMap = data2.stream().map(s -> new Pgm(s)).collect(Collectors.toMap(Pgm::getName, p -> p));
 		
 		allPgmMap.values().forEach( p -> p.setChilds( p.getSubPgm().stream().map(spn -> allPgmMap.get(spn).setParent(p) ).collect(Collectors.toList())) );
 
-		
 		Pgm rootPgm = allPgmMap.values().stream().filter(pgm -> pgm.getParent() == null).findFirst().get();
 		
-		int sum = rootPgm.updateChildWeights();
+		int sum = rootPgm.updateChildWeightsReq();
 		
-		allPgmMap.values().forEach( p -> System.out.println(p) );
-
-		int ret = allPgmMap.values().stream().map(p -> p.balanceDiff() ).filter(v -> v > 0).findFirst().get();
+		long ret = rootPgm.getInbalanceValueReq();
 		
 		System.out.println(ret);
-		
-		
 		
 	}
 
@@ -119,22 +114,30 @@ public class Day7p2 {
 			weight = Integer.parseInt(nameWeightSplit[1].replace('(', ' ').replace(')', ' ').trim());
 		}
 
-		public int updateChildWeights() {
+		public int updateChildWeightsReq() {
 			if(childWeightSum==0 && !childs.isEmpty()) {
-				childWeightSum = getChilds().stream().map(c -> c.updateChildWeights()).collect(Collectors.summingInt(w -> w));
+				childWeightSum = getChilds().stream().map(c -> c.updateChildWeightsReq()).collect(Collectors.summingInt(w -> w));
 			}
 			return weight + childWeightSum;
 		}
 		
-		public int balanceDiff() {
+		public long getInbalanceValueReq() {
 			if (!childs.isEmpty()) {
-				Optional<Integer> diff = childs.stream().map(p -> p.balanceDiff()).filter(v -> v > 0).findFirst();
+				Optional<Long> diff = childs.stream().map(p -> p.getInbalanceValueReq()).filter(v -> v > 0).findFirst();
 				if (diff.isPresent()) {
 					return diff.get();
 				} else if (childWeightSum % childs.size() != 0) {
-					IntSummaryStatistics stat = childs.stream()
-							.collect(Collectors.summarizingInt(p -> p.getTotalWeight()));
-					return stat.getMin();
+					long max = childs.stream().mapToInt(Pgm::getTotalWeight).max().getAsInt();
+					long min = childs.stream().mapToInt(Pgm::getTotalWeight).min().getAsInt();
+					List<Pgm> maxLst = childs.stream().filter(v -> v.getTotalWeight() == max).collect(Collectors.toList());
+					List<Pgm> minLst = childs.stream().filter(v -> v.getTotalWeight() == min).collect(Collectors.toList());
+					if(maxLst.size()>1) {
+						long off = max - min;
+						return minLst.get(0).weight + off;
+					} else {
+						long off = max - min;
+						return maxLst.get(0).weight - off;
+					}
 				}
 			}
 			return 0;
@@ -183,22 +186,6 @@ public class Day7p2 {
 		
 	}
 	
-	
-	static List<String> data = Arrays.asList( 
-	"pbga (66)",
-	"xhth (57)",
-	"ebii (61)",
-	"havc (66)",
-	"ktlj (57)",
-	"fwft (72) -> ktlj, cntj, xhth",
-	"qoyq (66)",
-	"padx (45) -> pbga, havc, qoyq",
-	"tknk (41) -> ugml, padx, fwft",
-	"jptl (61)",
-	"ugml (68) -> gyxo, ebii, jptl",
-	"gyxo (61)",
-	"cntj (57)"
-	);
 	
 	static List<String> data2 = Arrays.asList( 
 			"wdysq (135) -> sxldvex, wiasj",
