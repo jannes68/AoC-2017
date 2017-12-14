@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class Day14 {
+public class Day14p2 {
 
 	/*
 	
@@ -61,7 +61,8 @@ public class Day14 {
 		for (int row = 0; row < 128; row++) {
 			list = IntStream.rangeClosed(0, 255).mapToObj(s -> s).collect(Collectors.toList());
 			List<Integer> extraLenghts = Arrays.asList(17, 31, 73, 47, 23);
-			String lengthStr = "wenycdww-" + row;
+			//String lengthStr = "wenycdww-" + row;
+			String lengthStr = "flqrgnkx-" + row;
 			
 			List<Integer> lenghts = lengthStr.codePoints().mapToObj(c -> c).collect(Collectors.toList());
 			lenghts.addAll(extraLenghts);
@@ -81,10 +82,51 @@ public class Day14 {
 			hashRows.add(result);
 		}		
 		
-		int bits = hashRows.stream().collect(Collectors.summingInt(hex -> new BigInteger(hex,16).bitCount()));
-		System.out.println("bits: " + bits);
+		final int rowSize = 128;
+		
+		Region[] prevRegionRow = new Region[rowSize];
+		for( int rowIdx = 0; rowIdx<hashRows.size();rowIdx++) {
+			String hashRow = hashRows.get(rowIdx);
+			
+			BigInteger curRow = new BigInteger(hashRow,16);
+			Region[] curRegionRow = new Region[rowSize];
+			
+			Region curRegion = null;
+			for(int i = 0;i<rowSize;i++) {
+				if(curRow.testBit(i)) {
+					if(curRegion==null) {
+						curRegion = new Region();
+					} 
+					curRegionRow[i]=curRegion;
+					// Check for region above
+					if(prevRegionRow[i]!=null && curRegion.id != prevRegionRow[i].id) {
+						// use same id for this region
+						curRegion.id = prevRegionRow[i].id; 
+						Region.idCnt--;
+					}
+				} else {
+					curRegion = null;
+				}
+			}
+			prevRegionRow = curRegionRow;
+	}	
+		
+		System.out.println(Region.idCnt); //1242
 		
 		
+	}
+	
+	static class Region {
+		static int idCnt = 0;
+		public Integer id;
+		Region() {
+			this.id = idCnt++;
+		}
+		
+	}
+	
+	static boolean isBitSet(String hex, int bitNum) {
+		return new BigInteger(hex, 16).testBit(bitNum);
 	}
 	
 }
