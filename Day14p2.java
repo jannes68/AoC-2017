@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.stream.IntStream;import javax.swing.RowFilter;
 
 public class Day14p2 {
 
@@ -56,13 +56,11 @@ public class Day14p2 {
 	
 	public static void main(String[] args) {
 		
-		List<String> hashRows = new ArrayList<>();
 		
 		for (int row = 0; row < 128; row++) {
 			list = IntStream.rangeClosed(0, 255).mapToObj(s -> s).collect(Collectors.toList());
 			List<Integer> extraLenghts = Arrays.asList(17, 31, 73, 47, 23);
-			//String lengthStr = "wenycdww-" + row;
-			String lengthStr = "flqrgnkx-" + row;
+			String lengthStr = "wenycdww-" + row;
 			
 			List<Integer> lenghts = lengthStr.codePoints().mapToObj(c -> c).collect(Collectors.toList());
 			lenghts.addAll(extraLenghts);
@@ -82,54 +80,48 @@ public class Day14p2 {
 			hashRows.add(result);
 		}		
 		
-		final int rowSize = 128;
-		
-		Integer[] prevRegionRow = new Integer[rowSize];
-		int curCnt = 0;
-		for( int rowIdx = 0; rowIdx<hashRows.size();rowIdx++) {
-			String hashRow = hashRows.get(rowIdx);
-			
-			BigInteger curRow = new BigInteger(hashRow,16);
-			Integer[] curRegionRow = new Integer[rowSize];
-			
-			Integer curRegion = null;
-			Integer[] curRowVals = new Integer[rowSize];
-			for(int i = 0;i<rowSize;i++) {
-				if(curRow.testBit(i)) {
-					if(curRegion==null) {
-						if(curRegion.equals(prevRegionRow[i])) {
-							curRegion = prevRegionRow[i];
-						} else {
-							curRegion = curCnt++;
-						}
-					} 
-					curRegionRow[i]=curRegion;
-					// Check for region above
-					if(prevRegionRow[i]!=null && curRegion != prevRegionRow[i]) {
-						// use same id for this region
-						//replace osv....
-						curRegion.id = prevRegionRow[i].id; 
-						Region.idCnt--;
-					}
-				} else {
-					curRegion = null;
-				}
-			}
-			prevRegionRow = curRegionRow;
-	}	
-		
-		System.out.println(Region.idCnt); //1242
-		
-		
-	}
-	
-	static class Region {
-		static int idCnt = 0;
-		public Integer id;
-		Region() {
-			this.id = idCnt++;
+		for(int cr = 0; cr<hashRows.size(); cr++) {
+			Integer[] rRow = new Integer[rowColSize];
+			regionArray[cr] = rRow;
 		}
 		
+		for(int x = 0; x<rowColSize; x++) {
+			for(int y = 0; y<hashRows.size();y++) {
+				if(checkPos(x,y)) {
+					regionCnt++;
+				}
+			}
+		}
+		
+		System.out.println(regionCnt); //1128
+		
+		
+	}	
+	static final int rowColSize = 128;
+	static int regionCnt = 0;
+	static List<String> hashRows = new ArrayList<>();
+	static Integer[][] regionArray = new Integer[rowColSize][];
+
+	static boolean isBitSet(int x, int y) {
+		if(x>=0&&x<rowColSize && y>=0 && y<hashRows.size()) {
+			return isBitSet(hashRows.get(y),x);
+		} else {
+			return false;
+		}
+	}
+	
+	static boolean checkPos(int x, int y) {
+		if(x>=0&&x<rowColSize && y>=0 && y<hashRows.size()) {
+			if(regionArray[x][y] == null && isBitSet(x,y)) {
+				regionArray[x][y] = regionCnt;
+				checkPos(x+1,y);
+				checkPos(x-1,y);
+				checkPos(x,y+1);
+				checkPos(x,y-1);
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	static boolean isBitSet(String hex, int bitNum) {
