@@ -84,23 +84,30 @@ public class Day14p2 {
 		
 		final int rowSize = 128;
 		
-		Region[] prevRegionRow = new Region[rowSize];
+		Integer[] prevRegionRow = new Integer[rowSize];
+		int curCnt = 0;
 		for( int rowIdx = 0; rowIdx<hashRows.size();rowIdx++) {
 			String hashRow = hashRows.get(rowIdx);
 			
 			BigInteger curRow = new BigInteger(hashRow,16);
-			Region[] curRegionRow = new Region[rowSize];
+			Integer[] curRegionRow = new Integer[rowSize];
 			
-			Region curRegion = null;
+			Integer curRegion = null;
+			Integer[] curRowVals = new Integer[rowSize];
 			for(int i = 0;i<rowSize;i++) {
 				if(curRow.testBit(i)) {
 					if(curRegion==null) {
-						curRegion = new Region();
+						if(curRegion.equals(prevRegionRow[i])) {
+							curRegion = prevRegionRow[i];
+						} else {
+							curRegion = curCnt++;
+						}
 					} 
 					curRegionRow[i]=curRegion;
 					// Check for region above
-					if(prevRegionRow[i]!=null && curRegion.id != prevRegionRow[i].id) {
+					if(prevRegionRow[i]!=null && curRegion != prevRegionRow[i]) {
 						// use same id for this region
+						//replace osv....
 						curRegion.id = prevRegionRow[i].id; 
 						Region.idCnt--;
 					}
