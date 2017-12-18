@@ -25,15 +25,6 @@ public class Day18p2 {
 		long cnt = 0;
 		while (p0wCnt < 2 || p1wCnt < 2) {
 			
-			do {
-				cnt++;
-				
-			} while(p0.step());
-			System.out.println("----- end 0 step: " + cnt + "-> " + p1.getSendCnt() + " q0:" + qP0in.size() + " q1:" + qP1in.size() );
-			do {
-				cnt++;
-			} while(p1.step());
-			System.out.println("----- end 1 step: " + cnt + "-> " + p1.getSendCnt() + " q0:" + qP0in.size() + " q1:" + qP1in.size() );
 			p1wCnt = p1.step() ? 0 : p1wCnt + 1;
 			p0wCnt = p0.step() ? 0 : p0wCnt + 1;
 			cnt++;
