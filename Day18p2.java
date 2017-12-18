@@ -5,13 +5,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.stream.Collectors;
 
 public class Day18p2 {
 
 	public static void main(String[] args) {
-		LinkedList<Long> qP0in = new LinkedList<>();
-		LinkedList<Long> qP1in = new LinkedList<>();
+		Queue<Long> qP0in = new LinkedList<>();
+		Queue<Long> qP1in = new LinkedList<>();
 
 		Program p0 = new Program();
 		p0.init(data, qP0in, qP1in, 0);
@@ -23,12 +24,19 @@ public class Day18p2 {
 		int p1wCnt = 0;
 		long cnt = 0;
 		while (p0wCnt < 2 || p1wCnt < 2) {
-			p0wCnt = p0.step() ? 0 : p0wCnt + 1;
+			
+			do {
+				cnt++;
+				
+			} while(p0.step());
+			System.out.println("----- end 0 step: " + cnt + "-> " + p1.getSendCnt() + " q0:" + qP0in.size() + " q1:" + qP1in.size() );
+			do {
+				cnt++;
+			} while(p1.step());
+			System.out.println("----- end 1 step: " + cnt + "-> " + p1.getSendCnt() + " q0:" + qP0in.size() + " q1:" + qP1in.size() );
 			p1wCnt = p1.step() ? 0 : p1wCnt + 1;
+			p0wCnt = p0.step() ? 0 : p0wCnt + 1;
 			cnt++;
-			if(cnt%5000000==0) {
-				System.out.println("step: " + cnt + "-> " + p1.getSendCnt() + " q0:" + qP0in.size() + " q1:" + qP1in.size() );
-			}
 		}
 
 		System.out.println("Count:" + p1.getSendCnt());
@@ -41,27 +49,25 @@ public class Day18p2 {
 		long pc = 0;
 		long sendCnt = 0;
 		List<Instr> instructions = new ArrayList<>();
-		LinkedList<Long> inQueue;
-		LinkedList<Long> outQueue;
+		Queue<Long> inQueue;
+		Queue<Long> outQueue;
 
 		boolean step() {
 			if (pc >= 0 && pc < instructions.size()) {
 				long prevPc = pc;
 				Instr instr = instructions.get((int) pc);
-
-//				String regs = this.regMap.keySet().stream().map(k -> "" + k + "->" + regMap.get(k))
-//						.collect(Collectors.joining(","));
-//				System.out.println("id:" + id + " PC:" + prevPc + ": " + instr.getOrgCmdString() + " -> PC:" + pc);
-//				System.out.println(regs);
-				
-				return instr.exec(this);
+				boolean ret = instr.exec(this);
+//				String regs = regMap.keySet().stream().map(k-> "" + k + "->" + regMap.get(k)).collect(Collectors.joining(","));
+//				System.out.println("PC:" + prevPc + ": " + instr.getOrgCmdString() + "  -> PC:" + pc + " => " + regs);
+				return ret;
 			}
 			return false;
 		}
 
-		void init(List<String> data, LinkedList<Long> inQueue, LinkedList<Long> outQueue, int id) {
+		void init(List<String> data, Queue<Long> inQueue, Queue<Long> outQueue, int id) {
 			this.id = id;
 			setReg("p", id);
+			setReg("1",1);
 			this.inQueue = inQueue;
 			this.outQueue = outQueue;
 			data.stream().forEach(r -> {
@@ -213,7 +219,7 @@ public class Day18p2 {
 		}
 
 		public boolean exec(Program pgm) {
-			pgm.outQueue.addFirst(pgm.getReg(registerA));
+			pgm.outQueue.add(pgm.getReg(registerA));
 			pgm.sendCnt++;
 			pgm.incPC(1);
 			return true;
@@ -230,7 +236,7 @@ public class Day18p2 {
 			if (pgm.inQueue.isEmpty()) {
 				return false;
 			} else {
-				pgm.setReg(registerA, pgm.inQueue.removeLast());
+				pgm.setReg(registerA, pgm.inQueue.remove());
 				pgm.incPC(1);
 				return true;
 			}
@@ -258,12 +264,49 @@ public class Day18p2 {
 
 	}
 
-	static List<String> data = Arrays.asList("set i 31", "set a 1", "mul p 17", "jgz p p", "mul a 2", "add i -1",
-			"jgz i -2", "add a -1", "set i 127", "set p 316", "mul p 8505", "mod p a", "mul p 129749", "add p 12345",
-			"mod p a", "set b p", "mod b 10000", "snd b", "add i -1", "jgz i -9", "jgz a 3", "rcv b", "jgz b -1",
-			"set f 0", "set i 126", "rcv a", "rcv b", "set p a", "mul p -1", "add p b", "jgz p 4", "snd a", "set a b",
-			"jgz 1 3", "snd b", "set f 1", "add i -1", "jgz i -11", "snd a", "jgz f -16", "jgz a -19"
+	static List<String> data = Arrays.asList(
 
+			"set i 31", //		1
+			"set a 1", //		2
+			"mul p 17", //		3
+			"jgz p p", //		4 	
+			"mul a 2", //		5
+			"add i -1", //		6	
+			"jgz i -2", //		7
+			"add a -1", //		8
+			"set i 127", //		9
+			"set p 316", //		10
+			"mul p 8505", //	11 
+			"mod p a", //		12	
+			"mul p 129749", //	13			
+			"add p 12345", //	14	
+			"mod p a", //		15	
+			"set b p", //		16	
+			"mod b 10000", //	17	
+			"snd b", //			18	
+			"add i -1", //		19	
+			"jgz i -9", //		20 
+			"jgz a 3", //		21 
+			"rcv b", //			22
+			"jgz b -1", //		23
+			"set f 0", //		24 
+			"set i 126", //		25
+			"rcv a", //			26
+			"rcv b", //			27
+			"set p a", //		28
+			"mul p -1", //		29
+			"add p b", //		30
+			"jgz p 4", //		31
+			"snd a", //			32
+			"set a b", //		33
+			"jgz 1 3", //		34
+			"snd b", //			35
+			"set f 1", //		36
+			"add i -1", //		37
+			"jgz i -11", //		38
+			"snd a", //			39
+			"jgz f -16", //		40
+			"jgz a -19" //		41
 	);
-
+	
 }

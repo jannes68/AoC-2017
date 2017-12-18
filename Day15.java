@@ -1,5 +1,4 @@
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,30 +41,32 @@ To get a significant sample, the judge would like to consider 40 million pairs.
 	*/
 
 	static class Generator {
-		static final BigInteger divisor = BigInteger.valueOf(2147483647L);
-		BigInteger prev;
-		BigInteger factor;
+		static final long divisor = 2147483647;
+		long prev;
+		long factor;
 
 		Generator(long seed, long factor) {
-			this.prev = BigInteger.valueOf(seed);
-			this.factor = BigInteger.valueOf(factor);
+			this.prev = seed;
+			this.factor = factor;
 		}
 
-		BigInteger generate() {
-			prev = prev.multiply(factor);
-			return prev.mod(divisor);
+		long generate() {
+			prev = prev*factor%divisor;
+			return prev;
 		}
 	}
 	
 	public static void main(String[] args) {
 		long start = System.currentTimeMillis();
-		BigInteger filter = BigInteger.valueOf(0xffff);
 		Generator a = new Generator(65,16807);
 		Generator b = new Generator(8921,48271);
 		long counter = 0;
-		for(int i= 0; i< 40000000; i++) {
-//	for(int i= 0; i< 10000; i++) {
-			if(a.generate().and(filter).equals(b.generate().and(filter))) {
+		for(long i= 0; i< 40000000; i++) {
+//	for(long i= 0; i< 10; i++) {
+			long av = a.generate();
+			long bv = b.generate();
+			
+			if((av & 0xffff)  == (bv & 0xffff)) {
 				counter++;
 			}
 		}

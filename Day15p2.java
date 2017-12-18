@@ -1,5 +1,4 @@
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class Day15b {
+public class Day15p2 {
 
 	/*
 --- Day 15: Dueling Generators ---
@@ -42,32 +41,35 @@ To get a significant sample, the judge would like to consider 40 million pairs.
 	*/
 
 	static class Generator {
-		static final int divisor = 2147483647;
-		int prev;
-		int factor;
+		static final long divisor = 2147483647;
+		long prev;
+		long factor;
+		long filter;
 
-		Generator(int seed, int factor) {
+		Generator(long seed, long factor, long filter) {
 			this.prev = seed;
 			this.factor = factor;
+			this.filter = filter;
 		}
 
-		int generate() {
-			prev = prev*factor;
-			return prev%divisor;
+		long generate() {
+			do {
+				prev = prev*factor%divisor;
+			} while(prev%filter!=0);
+			return prev;
 		}
 	}
 	
 	public static void main(String[] args) {
 		long start = System.currentTimeMillis();
-		//BigInteger filter = BigInteger.valueOf(0xffff);
-		Generator a = new Generator(65,16807);
-		Generator b = new Generator(8921,48271);
-		int counter = 0;
-		for(int i= 0; i< 40000000; i++) {
-//	for(int i= 0; i< 10; i++) {
+		Generator a = new Generator(512,16807,4);
+		Generator b = new Generator(191,48271,8);
+		long counter = 0;
+		for(long i= 0; i< 5000000; i++) {
+//	for(long i= 0; i< 10; i++) {
 			long av = a.generate();
 			long bv = b.generate();
-			
+//			System.out.println(av + " : " + bv);
 			if((av & 0xffff)  == (bv & 0xffff)) {
 				counter++;
 			}
